@@ -16,13 +16,28 @@ Validate Get Existing User
 
     ${body}=    Set Variable    ${response.json()}
 
+    Validate Existing User Response    ${body}
+
     Should Be Equal    ${body}[data][first_name]    Janet
     Should Be Equal    ${body}[data][last_name]     Weaver
 
-    Dictionary Should Contain Key    ${body}[data]    email
-    Dictionary Should Contain Key    ${body}[data]    avatar
-
     Log To Console    Existing user validated successfully
+
+Validate Get Users List
+    [Documentation]    Validate successful retrieval of users list
+    [Tags]    smoke    regression    get    users
+
+    ${response}=    Get Users By Page    2
+
+    Should Be Equal As Integers    ${response.status_code}    200
+
+    ${body}=    Set Variable    ${response.json()}
+
+    Validate Users List Response    ${body}
+
+    Should Be Equal As Integers    ${body}[page]    2
+
+    Log To Console    Users list validated successfully
 
 Validate Non Existing User
     [Documentation]    Validate API response for non existing user
@@ -44,13 +59,7 @@ Validate User Creation
 
     ${body}=    Set Variable    ${response.json()}
 
-    Dictionary Should Contain Key    ${body}    name
-    Dictionary Should Contain Key    ${body}    job
-    Dictionary Should Contain Key    ${body}    id
-    Dictionary Should Contain Key    ${body}    createdAt
-
-    Should Not Be Empty    ${body}[name]
-    Should Not Be Empty    ${body}[job]
+    Validate Created User Response    ${body}
 
     Log To Console    User created successfully
 
@@ -64,9 +73,7 @@ Validate User Update
 
     ${body}=    Set Variable    ${response.json()}
 
-    Dictionary Should Contain Key    ${body}    name
-    Dictionary Should Contain Key    ${body}    job
-    Dictionary Should Contain Key    ${body}    updatedAt
+    Validate Updated User Response    ${body}
 
     Should Be Equal    ${body}[job]    Senior QA Engineer
 
@@ -81,3 +88,15 @@ Validate User Deletion
     Should Be Equal As Integers    ${response.status_code}    204
 
     Log To Console    User deleted successfully
+
+Validate User Response Security Headers
+    [Documentation]    Validate relevant security headers in API response
+    [Tags]    regression    security    headers    users
+
+    ${response}=    Get User By Id    2
+
+    Should Be Equal As Integers    ${response.status_code}    200
+
+    Validate Security Headers    ${response.headers}
+
+    Log To Console    Security headers validated successfully
