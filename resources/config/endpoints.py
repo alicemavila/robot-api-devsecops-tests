@@ -1,0 +1,3 @@
+USERS_ENDPOINT = "/users"
+LOGIN_ENDPOINT = "/login"
+REGISTER_ENDPOINT = "/register"
