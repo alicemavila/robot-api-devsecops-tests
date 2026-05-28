@@ -6,6 +6,13 @@ This project demonstrates scalable API automation architecture, reusable compone
 
 ---
 
+![Robot Framework](https://img.shields.io/badge/Robot%20Framework-Testing-red)
+![Python](https://img.shields.io/badge/Python-3.12-blue)
+![GitHub Actions](https://img.shields.io/badge/CI/CD-GitHub%20Actions-black)
+![Allure Report](https://img.shields.io/badge/Reports-Allure-purple)
+
+---
+
 # Features
 
 - Automated REST API validation
@@ -191,6 +198,18 @@ allure open reports/allure-report
 
 ---
 
+# Live Reports
+
+## GitHub Pages
+
+Access the published Allure Report:
+
+```text
+https://alicemavila.github.io/robot-api-devsecops-tests/
+```
+
+---
+
 # CI/CD Pipeline
 
 This project uses GitHub Actions for automated execution and reporting.
@@ -205,18 +224,6 @@ Pipeline execution includes:
 - Allure report generation
 - Artifact upload
 - GitHub Pages deployment
-
----
-
-# GitHub Pages Report
-
-The Allure report is automatically published after successful pipeline execution.
-
-Access:
-
-```text
-https://alicemavila.github.io/robot-api-devsecops-tests/
-```
 
 ---
 
@@ -249,6 +256,14 @@ https://alicemavila.github.io/robot-api-devsecops-tests/
 
 ---
 
+# Screenshots
+
+## Allure Report
+
+<img width="100%" alt="Allure Report" src="https://raw.githubusercontent.com/alicemavila/robot-api-devsecops-tests/main/assets/allure-report.png">
+
+---
+
 # Author
 
 ## Alice Monteiro
@@ -263,3 +278,6 @@ QA Engineer focused on:
 
 GitHub:
 https://github.com/alicemavila
+
+LinkedIn:
+https://www.linkedin.com/in/alice-m-223157119/
