@@ -19,6 +19,9 @@ jobs:
 
     timeout-minutes: 10
 
+    permissions:
+      contents: write
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -27,6 +30,12 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
 
       - name: Install dependencies
         run: |
@@ -43,15 +52,19 @@ jobs:
       - name: Run Robot Framework Tests
         run: |
           robot \
-          --listener allure_robotframework \
+          --listener "allure_robotframework;reports/allure-results" \
           --outputdir reports \
           tests/
+
+      - name: Install Allure Commandline
+        if: always()
+        run: |
+          npm install -g allure-commandline
 
       - name: Generate Allure Report
         if: always()
         run: |
-          npm install -g allure-commandline --save-dev
-          allure generate reports -o allure-report --clean
+          allure generate reports/allure-results -o reports/allure-report --clean
 
       - name: Upload Robot Framework Reports
         if: always()
@@ -65,4 +78,12 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: allure-report
-          path: allure-report/
+          path: reports/allure-report/
+
+      - name: Deploy Allure Report to GitHub Pages
+        if: github.ref == 'refs/heads/main' && always()
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: reports/allure-report
