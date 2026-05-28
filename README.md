@@ -1,27 +1,38 @@
 # Robot Framework API Automation Project
 
-API automation project built with Robot Framework, RequestsLibrary, Python and GitHub Actions.
+Robust API test automation framework built with Robot Framework, Python, RequestsLibrary and GitHub Actions, following modern QA engineering and CI/CD best practices.
 
-This project demonstrates API test automation best practices using:
-
-- Robot Framework
-- RequestsLibrary
-- Environment variables
-- CI/CD with GitHub Actions
-- Modular architecture
-- Payload separation
-- Reusable keywords
-- API validation strategies
+This project demonstrates scalable API automation architecture, reusable components, centralized configurations, automated reporting and continuous integration workflows suitable for professional QA portfolios.
 
 ---
 
-# Technologies
+# Features
 
-- Robot Framework
-- Python
-- RequestsLibrary
-- GitHub Actions
-- ReqRes API
+- Automated REST API validation
+- Modular and scalable project architecture
+- Reusable Robot Framework keywords
+- Centralized payload and endpoint management
+- Environment-based configuration
+- Smoke and regression execution strategy
+- CI/CD pipeline with GitHub Actions
+- Allure Report integration
+- Automated report publishing with GitHub Pages
+- Artifact generation and storage
+- Clean and maintainable test structure
+
+---
+
+# Technologies Used
+
+| Technology | Purpose |
+|---|---|
+| Robot Framework | Test automation framework |
+| Python | Support libraries and configurations |
+| RequestsLibrary | API requests and validations |
+| GitHub Actions | Continuous Integration |
+| Allure Report | Advanced test reporting |
+| ReqRes API | Test API environment |
+| dotenv | Environment variable management |
 
 ---
 
@@ -35,21 +46,31 @@ robot-api-devsecops-tests/
 │       └── api-tests.yml
 │
 ├── resources/
-│   ├── payloads/
-│   │   └── user_payloads.py
-│   │
 │   ├── config/
 │   │   ├── endpoints.py
 │   │   └── variables.py
 │   │
+│   ├── payloads/
+│   │   └── user_payloads.py
+│   │
 │   └── keywords.robot
 │
 ├── tests/
+│   ├── auth_test.robot
+│   ├── security_test.robot
 │   └── users_test.robot
 │
 ├── reports/
+│   ├── allure-results/
+│   ├── allure-report/
+│   ├── log.html
+│   ├── output.xml
+│   └── report.html
+│
+├── output/
 │
 ├── .env
+├── .env.example
 ├── .gitignore
 ├── requirements.txt
 ├── run_tests.bat
@@ -60,51 +81,41 @@ robot-api-devsecops-tests/
 
 # Test Coverage
 
-Implemented scenarios:
+## Authentication Tests
 
-- Get existing user
-- Get non-existing user
-- Create user
-- Update user
-- Delete user
+- Validate successful login
+- Validate login without password
+
+## Security Tests
+
+- Validate request without API key
+- Validate request with invalid API key
+- Validate security headers
+
+## User API Tests
+
+- Validate get existing user
+- Validate get users list
+- Validate non-existing user
+- Validate user creation
+- Validate user update
+- Validate user deletion
+- Validate response structure
 
 ---
 
-# Setup
+# Local Setup
 
-## Clone repository
+## Clone Repository
 
 ```bash
-git clone <repository_url>
+git clone https://github.com/alicemavila/robot-api-devsecops-tests.git
+cd robot-api-devsecops-tests
 ```
 
 ---
 
-## Create virtual environment
-
-```bash
-python -m venv venv
-```
-
----
-
-## Activate virtual environment
-
-### Windows
-
-```bash
-venv\Scripts\activate
-```
-
-### Linux/Mac
-
-```bash
-source venv/bin/activate
-```
-
----
-
-## Install dependencies
+## Install Dependencies
 
 ```bash
 pip install -r requirements.txt
@@ -112,20 +123,22 @@ pip install -r requirements.txt
 
 ---
 
-# Environment Variables
+# Environment Configuration
 
-Create a `.env` file:
+Create a `.env` file in the project root directory:
 
 ```env
 BASE_URL=https://reqres.in/api
 API_KEY=YOUR_API_KEY
+DEFAULT_TIMEOUT=30
+VERIFY_SSL=True
 ```
 
 ---
 
-# Run Tests
+# Running Tests
 
-## Execute all tests
+## Execute Complete Test Suite
 
 ```bash
 robot -d reports tests/
@@ -133,7 +146,7 @@ robot -d reports tests/
 
 ---
 
-## Execute smoke tests
+## Execute Smoke Tests
 
 ```bash
 robot -i smoke -d reports tests/
@@ -141,7 +154,7 @@ robot -i smoke -d reports tests/
 
 ---
 
-## Execute regression tests
+## Execute Regression Tests
 
 ```bash
 robot -i regression -d reports tests/
@@ -149,47 +162,104 @@ robot -i regression -d reports tests/
 
 ---
 
-# Reports
+# Allure Report
 
-After execution, Robot Framework generates:
+## Generate Allure Results
 
-- log.html
-- report.html
-- output.xml
-
-inside the `reports/` folder.
+```bash
+robot ^
+--listener "allure_robotframework;reports/allure-results" ^
+--outputdir reports ^
+tests/
+```
 
 ---
 
-# CI/CD
+## Generate Allure Report
 
-This project uses GitHub Actions to execute automated API tests on:
+```bash
+allure generate reports/allure-results -o reports/allure-report --clean
+```
 
-- Push
-- Pull Requests
+---
 
-Pipeline includes:
+## Open Allure Report
 
+```bash
+allure open reports/allure-report
+```
+
+---
+
+# CI/CD Pipeline
+
+This project uses GitHub Actions for automated execution and reporting.
+
+Pipeline execution includes:
+
+- Repository checkout
+- Python setup
 - Dependency installation
-- Automated execution
+- Environment variable creation
+- Automated Robot Framework execution
+- Allure report generation
 - Artifact upload
+- GitHub Pages deployment
+
+---
+
+# GitHub Pages Report
+
+The Allure report is automatically published after successful pipeline execution.
+
+Access:
+
+```text
+https://alicemavila.github.io/robot-api-devsecops-tests/
+```
 
 ---
 
 # Best Practices Applied
 
+- Modular architecture
 - Separation of concerns
 - Reusable keywords
-- Centralized payloads
-- Centralized endpoints
-- Environment variables
-- CI/CD pipeline
-- Tag strategy
-- Scalable architecture
-- Clean code practices
+- Centralized configurations
+- Centralized payload management
+- Environment isolation
+- CI/CD automation
+- Tagging strategy
+- Scalable framework structure
+- Automated reporting
+- Clean code principles
+- Maintainable test design
+
+---
+
+# Future Improvements
+
+- API schema validation
+- Performance testing integration
+- Docker support
+- Parallel execution
+- Multi-environment execution
+- API contract testing
+- Database validation layer
 
 ---
 
 # Author
 
-Alice Monteiro - QA Engineer 
+## Alice Monteiro
+
+QA Engineer focused on:
+
+- Test Automation
+- API Testing
+- Robot Framework
+- CI/CD Pipelines
+- Software Quality Engineering
+
+GitHub:
+https://github.com/alicemavila
