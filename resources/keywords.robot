@@ -1,14 +1,13 @@
 *** Settings ***
-Library    RequestsLibrary
-Library    Collections
+Library         RequestsLibrary
+Library         Collections
+Library         ${CURDIR}/libraries/schema_validator.py
+Library         ${CURDIR}/payloads/user_payloads.py
+Variables       ${CURDIR}/config/variables.py
+Variables       ${CURDIR}/config/endpoints.py
 
-Library    payloads/user_payloads.py
-
-Variables    config/variables.py
-Variables    config/endpoints.py
 
 *** Keywords ***
-
 Create API Session
     ${headers}=    Create Dictionary
     ...    x-api-key=${API_KEY}
@@ -21,7 +20,6 @@ Create API Session
     ...    timeout=${DEFAULT_TIMEOUT}
     ...    verify=${VERIFY_SSL}
 
-
 Create API Session Without API Key
     ${headers}=    Create Dictionary
     ...    Content-Type=application/json
@@ -32,7 +30,6 @@ Create API Session Without API Key
     ...    headers=${headers}
     ...    timeout=${DEFAULT_TIMEOUT}
     ...    verify=${VERIFY_SSL}
-
 
 Create API Session With Invalid API Key
     ${headers}=    Create Dictionary
@@ -46,7 +43,6 @@ Create API Session With Invalid API Key
     ...    timeout=${DEFAULT_TIMEOUT}
     ...    verify=${VERIFY_SSL}
 
-
 Get User By Id
     [Arguments]    ${user_id}
 
@@ -55,7 +51,6 @@ Get User By Id
     ...    ${USERS_ENDPOINT}/${user_id}
 
     RETURN    ${response}
-
 
 Get Users By Page
     [Arguments]    ${page}
@@ -67,7 +62,6 @@ Get Users By Page
 
     RETURN    ${response}
 
-
 Get Non Existing User
     ${response}=    GET On Session
     ...    reqres
@@ -75,7 +69,6 @@ Get Non Existing User
     ...    expected_status=404
 
     RETURN    ${response}
-
 
 Create New User
     ${payload}=    Create User Payload
@@ -87,7 +80,6 @@ Create New User
     ...    expected_status=201
 
     RETURN    ${response}
-
 
 Update Existing User
     [Arguments]    ${user_id}
@@ -102,7 +94,6 @@ Update Existing User
 
     RETURN    ${response}
 
-
 Delete Existing User
     [Arguments]    ${user_id}
 
@@ -112,7 +103,6 @@ Delete Existing User
     ...    expected_status=204
 
     RETURN    ${response}
-
 
 Login Successfully
     ${payload}=    Create Dictionary
@@ -127,7 +117,6 @@ Login Successfully
 
     RETURN    ${response}
 
-
 Login Without Password
     ${payload}=    Create Dictionary
     ...    email=peter@klaven
@@ -140,7 +129,6 @@ Login Without Password
 
     RETURN    ${response}
 
-
 Request User Without API Key
     ${response}=    GET On Session
     ...    reqres_no_key
@@ -148,7 +136,6 @@ Request User Without API Key
     ...    expected_status=401
 
     RETURN    ${response}
-
 
 Request User With Invalid API Key
     ${response}=    GET On Session
@@ -158,21 +145,19 @@ Request User With Invalid API Key
 
     RETURN    ${response}
 
-
 Validate Existing User Response
     [Arguments]    ${body}
 
-    Dictionary Should Contain Key    ${body}          data
-    Dictionary Should Contain Key    ${body}          support
+    Dictionary Should Contain Key    ${body}    data
+    Dictionary Should Contain Key    ${body}    support
     Dictionary Should Contain Key    ${body}[data]    id
     Dictionary Should Contain Key    ${body}[data]    email
     Dictionary Should Contain Key    ${body}[data]    first_name
     Dictionary Should Contain Key    ${body}[data]    last_name
     Dictionary Should Contain Key    ${body}[data]    avatar
 
-    Should Contain         ${body}[data][email]     @reqres.in
+    Should Contain    ${body}[data][email]    @reqres.in
     Should Not Be Empty    ${body}[data][avatar]
-
 
 Validate Users List Response
     [Arguments]    ${body}
@@ -185,7 +170,6 @@ Validate Users List Response
     Dictionary Should Contain Key    ${body}    support
 
     Should Not Be Empty    ${body}[data]
-
 
 Validate Created User Response
     [Arguments]    ${body}
@@ -200,7 +184,6 @@ Validate Created User Response
     Should Not Be Empty    ${body}[id]
     Should Not Be Empty    ${body}[createdAt]
 
-
 Validate Updated User Response
     [Arguments]    ${body}
 
@@ -212,10 +195,71 @@ Validate Updated User Response
     Should Not Be Empty    ${body}[job]
     Should Not Be Empty    ${body}[updatedAt]
 
-
 Validate Security Headers
     [Arguments]    ${headers}
 
     Dictionary Should Contain Key    ${headers}    Content-Type
     Dictionary Should Contain Key    ${headers}    X-Content-Type-Options
     Dictionary Should Contain Key    ${headers}    X-Frame-Options
+
+Validate Existing User Schema
+    [Arguments]    ${body}
+    Validate Json Schema    ${body}    user_schema.json
+
+Validate Users List Schema
+    [Arguments]    ${body}
+    Validate Json Schema    ${body}    users_list_schema.json
+
+Validate Created User Schema
+    [Arguments]    ${body}
+    Validate Json Schema    ${body}    create_user_schema.json
+
+Validate Updated User Schema
+    [Arguments]    ${body}
+    Validate Json Schema    ${body}    update_user_schema.json
+
+Validate Login Success Schema
+    [Arguments]    ${body}
+    Validate Json Schema    ${body}    login_success_schema.json
+
+Validate Error Response Schema
+    [Arguments]    ${body}
+    Validate Json Schema    ${body}    error_response_schema.json
+
+Login Without Email
+    ${payload}=    Create Dictionary
+    ...    password=cityslicka
+    ${response}=    POST On Session
+    ...    reqres
+    ...    ${LOGIN_ENDPOINT}
+    ...    json=${payload}
+    ...    expected_status=400
+    RETURN    ${response}
+
+Login With Empty Payload
+    ${payload}=    Create Dictionary
+    ${response}=    POST On Session
+    ...    reqres
+    ...    ${LOGIN_ENDPOINT}
+    ...    json=${payload}
+    ...    expected_status=400
+    RETURN    ${response}
+
+Register Without Password
+    ${payload}=    Create Dictionary
+    ...    email=sydney@fife
+    ${response}=    POST On Session
+    ...    reqres
+    ...    ${REGISTER_ENDPOINT}
+    ...    json=${payload}
+    ...    expected_status=400
+    RETURN    ${response}
+
+Register With Empty Payload
+    ${payload}=    Create Dictionary
+    ${response}=    POST On Session
+    ...    reqres
+    ...    ${REGISTER_ENDPOINT}
+    ...    json=${payload}
+    ...    expected_status=400
+    RETURN    ${response}
