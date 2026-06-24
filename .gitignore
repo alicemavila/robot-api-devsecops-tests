@@ -3,11 +3,16 @@ __pycache__/
 
 .env
 
-log.html
-report.html
-output.xml
-
 reports/
 
 .idea/
 .vscode/
+
+# Generated test reports
+output/
+allure-results/
+allure-report/
+reports/
+log.html
+report.html
+output.xml

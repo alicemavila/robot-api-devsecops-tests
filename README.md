@@ -2,7 +2,7 @@
 
 Robust API test automation framework built with Robot Framework, Python, RequestsLibrary and GitHub Actions, following modern QA engineering and CI/CD best practices.
 
-This project demonstrates scalable API automation architecture, reusable components, centralized configurations, automated reporting and continuous integration workflows suitable for professional QA portfolios.
+This project demonstrates a scalable API automation architecture with reusable components, centralized configurations, automated reporting and continuous integration workflows suitable for professional QA portfolios.
 
 ---
 
@@ -15,31 +15,32 @@ This project demonstrates scalable API automation architecture, reusable compone
 
 # Features
 
-- Automated REST API validation
-- Modular and scalable project architecture
-- Reusable Robot Framework keywords
-- Centralized payload and endpoint management
-- Environment-based configuration
-- Smoke and regression execution strategy
-- CI/CD pipeline with GitHub Actions
-- Allure Report integration
-- Automated report publishing with GitHub Pages
-- Artifact generation and storage
-- Clean and maintainable test structure
+* Automated REST API validation
+* Modular and scalable project architecture
+* Reusable Robot Framework keywords
+* Centralized payload and endpoint management
+* Environment-based configuration
+* Smoke and regression execution strategy
+* CI/CD pipeline with GitHub Actions
+* Allure Report integration
+* Automated report publishing with GitHub Pages
+* Artifact generation and storage through GitHub Actions
+* Clean and maintainable test structure
+* Security-oriented API validations
 
 ---
 
 # Technologies Used
 
-| Technology | Purpose |
-|---|---|
-| Robot Framework | Test automation framework |
-| Python | Support libraries and configurations |
-| RequestsLibrary | API requests and validations |
-| GitHub Actions | Continuous Integration |
-| Allure Report | Advanced test reporting |
-| ReqRes API | Test API environment |
-| dotenv | Environment variable management |
+| Technology      | Purpose                              |
+| --------------- | ------------------------------------ |
+| Robot Framework | Test automation framework            |
+| Python          | Support libraries and configurations |
+| RequestsLibrary | API requests and validations         |
+| GitHub Actions  | Continuous Integration               |
+| Allure Report   | Advanced test reporting              |
+| ReqRes API      | Test API environment                 |
+| dotenv          | Environment variable management      |
 
 ---
 
@@ -67,21 +68,26 @@ robot-api-devsecops-tests/
 │   ├── security_test.robot
 │   └── users_test.robot
 │
-├── reports/
-│   ├── allure-results/
-│   ├── allure-report/
-│   ├── log.html
-│   ├── output.xml
-│   └── report.html
-│
-├── output/
-│
-├── .env
 ├── .env.example
 ├── .gitignore
 ├── requirements.txt
 ├── run_tests.bat
 └── README.md
+```
+
+> Test reports and execution outputs are generated locally or by GitHub Actions and should not be committed to the repository.
+
+Generated files and folders such as the examples below are ignored by Git:
+
+```bash
+reports/
+output/
+allure-results/
+allure-report/
+log.html
+report.html
+output.xml
+.env
 ```
 
 ---
@@ -90,30 +96,30 @@ robot-api-devsecops-tests/
 
 ## Authentication Tests
 
-- Validate successful login
-- Validate login without password
+* Validate successful login
+* Validate login without password
 
 ## Security Tests
 
-- Validate request without API key
-- Validate request with invalid API key
-- Validate security headers
+* Validate request without API key
+* Validate request with invalid API key
+* Validate security headers
 
 ## User API Tests
 
-- Validate get existing user
-- Validate get users list
-- Validate non-existing user
-- Validate user creation
-- Validate user update
-- Validate user deletion
-- Validate response structure
+* Validate get existing user
+* Validate get users list
+* Validate non-existing user
+* Validate user creation
+* Validate user update
+* Validate user deletion
+* Validate response structure
 
 ---
 
 # Local Setup
 
-## Clone Repository
+## 1. Clone Repository
 
 ```bash
 git clone https://github.com/alicemavila/robot-api-devsecops-tests.git
@@ -122,7 +128,37 @@ cd robot-api-devsecops-tests
 
 ---
 
-## Install Dependencies
+## 2. Create Virtual Environment
+
+```bash
+python -m venv venv
+```
+
+---
+
+## 3. Activate Virtual Environment
+
+### Windows CMD
+
+```bash
+venv\Scripts\activate
+```
+
+### Windows PowerShell
+
+```bash
+.\venv\Scripts\Activate.ps1
+```
+
+### Linux / Mac
+
+```bash
+source venv/bin/activate
+```
+
+---
+
+## 4. Install Dependencies
 
 ```bash
 pip install -r requirements.txt
@@ -132,14 +168,27 @@ pip install -r requirements.txt
 
 # Environment Configuration
 
-Create a `.env` file in the project root directory:
+Create a `.env` file in the project root directory based on the `.env.example` file.
+
+## `.env.example`
 
 ```env
-BASE_URL=https://reqres.in/api
+BASE_URL=https://reqres.in
 API_KEY=YOUR_API_KEY
 DEFAULT_TIMEOUT=30
 VERIFY_SSL=True
 ```
+
+## Local `.env`
+
+```env
+BASE_URL=https://reqres.in
+API_KEY=YOUR_API_KEY
+DEFAULT_TIMEOUT=30
+VERIFY_SSL=True
+```
+
+> Never commit the `.env` file because it may contain sensitive information such as API keys, tokens or credentials.
 
 ---
 
@@ -169,14 +218,33 @@ robot -i regression -d reports tests/
 
 ---
 
+## Execute Tests Using Windows Batch File
+
+```bash
+run_tests.bat
+```
+
+---
+
 # Allure Report
 
 ## Generate Allure Results
+
+### Windows CMD
 
 ```bash
 robot ^
 --listener "allure_robotframework;reports/allure-results" ^
 --outputdir reports ^
+tests/
+```
+
+### Linux / Mac
+
+```bash
+robot \
+--listener "allure_robotframework;reports/allure-results" \
+--outputdir reports \
 tests/
 ```
 
@@ -195,6 +263,8 @@ allure generate reports/allure-results -o reports/allure-report --clean
 ```bash
 allure open reports/allure-report
 ```
+
+> Allure CLI must be installed locally to generate and open the Allure report on your machine.
 
 ---
 
@@ -216,43 +286,78 @@ This project uses GitHub Actions for automated execution and reporting.
 
 Pipeline execution includes:
 
-- Repository checkout
-- Python setup
-- Dependency installation
-- Environment variable creation
-- Automated Robot Framework execution
-- Allure report generation
-- Artifact upload
-- GitHub Pages deployment
+* Repository checkout
+* Python setup
+* Dependency installation
+* Environment variable creation
+* Automated Robot Framework execution
+* Allure results generation
+* Allure report generation
+* Robot Framework report artifact upload
+* Allure report artifact upload
+* GitHub Pages deployment
+
+---
+
+# GitHub Secrets
+
+The following secret should be configured in GitHub Actions:
+
+| Secret  | Description                                                  |
+| ------- | ------------------------------------------------------------ |
+| API_KEY | API key used to authenticate requests against the ReqRes API |
+
+To configure it:
+
+1. Go to the GitHub repository
+2. Click on **Settings**
+3. Go to **Secrets and variables**
+4. Click on **Actions**
+5. Create the required repository secret
 
 ---
 
 # Best Practices Applied
 
-- Modular architecture
-- Separation of concerns
-- Reusable keywords
-- Centralized configurations
-- Centralized payload management
-- Environment isolation
-- CI/CD automation
-- Tagging strategy
-- Scalable framework structure
-- Automated reporting
-- Clean code principles
-- Maintainable test design
+* Modular architecture
+* Separation of concerns
+* Reusable keywords
+* Centralized configurations
+* Centralized payload management
+* Environment isolation
+* Sensitive data protection with `.env` and GitHub Secrets
+* CI/CD automation
+* Tagging strategy
+* Scalable framework structure
+* Automated reporting
+* Clean code principles
+* Maintainable test design
+* Generated reports excluded from version control
+
+---
+
+# Important Notes
+
+This project uses the public ReqRes API as a test environment.
+
+Because it depends on a public API, responses and availability may vary depending on the service status, authentication rules or usage limits.
+
+The goal of this project is to demonstrate API test automation practices, project organization, CI/CD integration and reporting strategy for QA portfolio purposes.
 
 ---
 
 # Future Improvements
 
-- API schema validation
-- Performance testing integration
-- Docker support
-- Parallel execution
-- Multi-environment execution
-- API contract testing
-- Database validation layer
+* API schema validation
+* Performance testing integration
+* Docker support
+* Parallel execution
+* Multi-environment execution
+* API contract testing
+* Database validation layer
+* Negative testing with malformed payloads
+* Authorization validation by user role
+* Rate limit validation
 
 ---
 
@@ -270,11 +375,11 @@ Pipeline execution includes:
 
 QA Engineer focused on:
 
-- Test Automation
-- API Testing
-- Robot Framework
-- CI/CD Pipelines
-- Software Quality Engineering
+* Test Automation
+* API Testing
+* Robot Framework
+* CI/CD Pipelines
+* Software Quality Engineering
 
 GitHub:
 https://github.com/alicemavila
