@@ -1,18 +1,18 @@
 venv/
 __pycache__/
-
 .env
 
+# Robot Framework reports
 reports/
-
-.idea/
-.vscode/
-
-# Generated test reports
 output/
-allure-results/
-allure-report/
-reports/
 log.html
 report.html
 output.xml
+
+# Allure generated files
+allure-results/
+allure-report/
+
+# IDE
+.idea/
+.vscode/
