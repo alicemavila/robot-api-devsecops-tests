@@ -1,0 +1,10 @@
+[tool.robocop]
+# Configuração do Robot Framework Language Server
+# Indica os arquivos de variáveis para resolver falsos positivos no LSP
+
+[tool.robotframework]
+python-path = ["resources"]
+variable-files = [
+    "resources/config/variables.py",
+    "resources/config/endpoints.py"
+]

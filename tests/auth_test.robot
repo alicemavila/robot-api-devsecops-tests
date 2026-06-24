@@ -1,9 +1,10 @@
 *** Settings ***
-Documentation    Authentication API automated tests
+Documentation       Authentication API automated tests
 
-Resource         ../resources/keywords.robot
+Resource            ../resources/keywords.robot
 
-Suite Setup      Create API Session
+Suite Setup         Create API Session
+
 
 *** Test Cases ***
 Validate Successful Login
@@ -17,7 +18,8 @@ Validate Successful Login
     ${body}=    Set Variable    ${response.json()}
 
     Dictionary Should Contain Key    ${body}    token
-    Should Not Be Empty             ${body}[token]
+    Should Not Be Empty    ${body}[token]
+    Validate Login Success Schema    ${body}
 
     Log To Console    Successful login validated
 
@@ -32,6 +34,7 @@ Validate Login Without Password
     ${body}=    Set Variable    ${response.json()}
 
     Dictionary Should Contain Key    ${body}    error
-    Should Not Be Empty             ${body}[error]
+    Should Not Be Empty    ${body}[error]
+    Validate Error Response Schema    ${body}
 
     Log To Console    Login without password validated

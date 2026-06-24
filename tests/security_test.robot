@@ -1,11 +1,10 @@
 *** Settings ***
-Documentation    API security automated tests
+Documentation       API security automated tests
 
-Resource         ../resources/keywords.robot
+Resource            ../resources/keywords.robot
 
 
 *** Test Cases ***
-
 Validate Request Without API Key
     [Documentation]    Validate API returns unauthorized when x-api-key is missing
     [Tags]    regression    negative    security    auth
@@ -25,7 +24,6 @@ Validate Request Without API Key
     ...    missing_api_key
 
     Log To Console    Missing API key validated successfully
-
 
 Validate Request With Invalid API Key
     [Documentation]    Validate API returns forbidden when x-api-key is invalid

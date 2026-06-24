@@ -1,9 +1,10 @@
 *** Settings ***
-Documentation    Users API automated tests
+Documentation       Users API automated tests
 
-Resource         ../resources/keywords.robot
+Resource            ../resources/keywords.robot
 
-Suite Setup      Create API Session
+Suite Setup         Create API Session
+
 
 *** Test Cases ***
 Validate Get Existing User
@@ -17,9 +18,10 @@ Validate Get Existing User
     ${body}=    Set Variable    ${response.json()}
 
     Validate Existing User Response    ${body}
+    Validate Existing User Schema    ${body}
 
     Should Be Equal    ${body}[data][first_name]    Janet
-    Should Be Equal    ${body}[data][last_name]     Weaver
+    Should Be Equal    ${body}[data][last_name]    Weaver
 
     Log To Console    Existing user validated successfully
 
@@ -34,6 +36,7 @@ Validate Get Users List
     ${body}=    Set Variable    ${response.json()}
 
     Validate Users List Response    ${body}
+    Validate Users List Schema    ${body}
 
     Should Be Equal As Integers    ${body}[page]    2
 
@@ -60,6 +63,7 @@ Validate User Creation
     ${body}=    Set Variable    ${response.json()}
 
     Validate Created User Response    ${body}
+    Validate Created User Schema    ${body}
 
     Log To Console    User created successfully
 
@@ -74,6 +78,7 @@ Validate User Update
     ${body}=    Set Variable    ${response.json()}
 
     Validate Updated User Response    ${body}
+    Validate Updated User Schema    ${body}
 
     Should Be Equal    ${body}[job]    Senior QA Engineer
 
