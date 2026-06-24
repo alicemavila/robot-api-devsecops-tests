@@ -1,13 +1,14 @@
 # Robot Framework API Automation Project
 
-Robust API test automation framework built with Robot Framework, Python, RequestsLibrary and GitHub Actions, following modern QA engineering and CI/CD best practices.
+Robust API test automation framework built with Robot Framework, Python, RequestsLibrary, Docker and GitHub Actions, following modern QA engineering and CI/CD best practices.
 
-This project demonstrates a scalable API automation architecture with reusable components, centralized configurations, JSON Schema validation, negative API testing, automated reporting and continuous integration workflows suitable for professional QA portfolios.
+This project demonstrates a scalable API automation architecture with reusable components, centralized configurations, JSON Schema validation, negative API testing, Docker-based execution, automated reporting and continuous integration workflows suitable for professional QA portfolios.
 
 ---
 
 ![Robot Framework](https://img.shields.io/badge/Robot%20Framework-Testing-red)
 ![Python](https://img.shields.io/badge/Python-3.12-blue)
+![Docker](https://img.shields.io/badge/Docker-Containerized-blue)
 ![GitHub Actions](https://img.shields.io/badge/CI/CD-GitHub%20Actions-black)
 ![Allure Report](https://img.shields.io/badge/Reports-Allure-purple)
 
@@ -25,6 +26,8 @@ This project demonstrates a scalable API automation architecture with reusable c
 * Positive and negative API test scenarios
 * Negative API testing with invalid payloads
 * Smoke and regression execution strategy
+* Docker-based test execution
+* Containerized execution with Robot Framework and Allure Report
 * CI/CD pipeline with GitHub Actions
 * Allure Report integration
 * Automated report publishing with GitHub Pages
@@ -43,6 +46,7 @@ This project demonstrates a scalable API automation architecture with reusable c
 | Python          | Support libraries, custom validators and configurations |
 | RequestsLibrary | API requests and validations                            |
 | JSON Schema     | API response contract validation                        |
+| Docker          | Containerized and reproducible test execution           |
 | GitHub Actions  | Continuous Integration                                  |
 | Allure Report   | Advanced test reporting                                 |
 | ReqRes API      | Test API environment                                    |
@@ -89,15 +93,17 @@ robot-api-devsecops-tests/
 │   ├── security_test.robot
 │   └── users_test.robot
 │
+├── .dockerignore
 ├── .env.example
 ├── .gitignore
+├── Dockerfile
 ├── requirements.txt
 ├── robot.toml
 ├── run_tests.bat
 └── README.md
 ```
 
-> Test reports and execution outputs are generated locally or by GitHub Actions and should not be committed to the repository.
+> Test reports and execution outputs are generated locally, through Docker or by GitHub Actions and should not be committed to the repository.
 
 Generated files and folders such as the examples below are ignored by Git:
 
@@ -186,7 +192,7 @@ venv\Scripts\activate
 
 ### Windows PowerShell
 
-```bash
+```powershell
 .\venv\Scripts\Activate.ps1
 ```
 
@@ -309,6 +315,82 @@ run_tests.bat
 
 ---
 
+# Docker Execution
+
+This project supports containerized test execution using Docker.
+
+Docker execution allows the test suite to run in a standardized environment, reducing local setup issues related to Python, dependencies, Java and Allure CLI.
+
+## Build Docker Image
+
+```bash
+docker build -t robot-api-devsecops-tests .
+```
+
+---
+
+## Run Tests with Docker
+
+### Windows PowerShell
+
+```powershell
+docker run --rm --env-file .env -v "${PWD}/reports:/app/reports" robot-api-devsecops-tests
+```
+
+### Windows CMD
+
+```bash
+docker run --rm --env-file .env -v "%cd%/reports:/app/reports" robot-api-devsecops-tests
+```
+
+### Linux / Mac
+
+```bash
+docker run --rm --env-file .env -v "$(pwd)/reports:/app/reports" robot-api-devsecops-tests
+```
+
+The Docker execution runs the full Robot Framework test suite and generates Robot Framework reports and Allure report files inside the `reports` directory.
+
+Expected execution result:
+
+```text
+15 tests, 15 passed, 0 failed
+```
+
+---
+
+## Docker Reports
+
+After running the tests with Docker, the generated reports will be available in:
+
+```bash
+reports/
+```
+
+Main report files:
+
+```bash
+reports/output.xml
+reports/log.html
+reports/report.html
+reports/allure-results/
+reports/allure-report/
+```
+
+To serve the generated Allure report locally without using Allure CLI, run:
+
+```bash
+python -m http.server 8080 --directory reports/allure-report
+```
+
+Then access:
+
+```text
+http://localhost:8080
+```
+
+---
+
 # Allure Report
 
 ## Generate Allure Results
@@ -362,6 +444,8 @@ allure serve reports/allure-results
 ```
 
 > Allure CLI and Java must be installed locally to generate and open the Allure report on your machine.
+>
+> If you do not want to install Allure CLI locally, use the Docker execution instead.
 
 ---
 
@@ -468,6 +552,8 @@ resources/config/endpoints.py
 * Sensitive data protection with `.env` and GitHub Secrets
 * JSON Schema validation
 * Positive and negative test coverage
+* Docker-based execution
+* Reproducible test environment with containers
 * CI/CD automation
 * Tagging strategy
 * Scalable framework structure
@@ -485,13 +571,12 @@ This project uses the public ReqRes API as a test environment.
 
 Because it depends on a public API, responses and availability may vary depending on the service status, authentication rules or usage limits.
 
-The goal of this project is to demonstrate API test automation practices, project organization, schema validation, negative testing, CI/CD integration and reporting strategy for QA portfolio purposes.
+The goal of this project is to demonstrate API test automation practices, project organization, schema validation, negative testing, Docker-based execution, CI/CD integration and reporting strategy for QA portfolio purposes.
 
 ---
 
 # Future Improvements
 
-* Docker support
 * Parallel execution
 * Performance testing integration
 * API contract testing
@@ -518,6 +603,7 @@ QA Engineer focused on:
 * Test Automation
 * API Testing
 * Robot Framework
+* Docker-based Test Execution
 * CI/CD Pipelines
 * Software Quality Engineering
 
