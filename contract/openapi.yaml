@@ -1,0 +1,154 @@
+openapi: 3.0.3
+
+info:
+  title: ReqRes API Contract
+  version: 1.0.0
+  description: OpenAPI contract used for automated API contract testing in a QA portfolio project.
+
+servers:
+  - url: https://reqres.in/api
+
+components:
+  schemas:
+    User:
+      type: object
+      required:
+        - id
+        - email
+        - first_name
+        - last_name
+        - avatar
+      properties:
+        id:
+          type: integer
+          example: 2
+        email:
+          type: string
+          format: email
+          example: janet.weaver@reqres.in
+        first_name:
+          type: string
+          example: Janet
+        last_name:
+          type: string
+          example: Weaver
+        avatar:
+          type: string
+          format: uri
+
+    Support:
+      type: object
+      required:
+        - url
+        - text
+      properties:
+        url:
+          type: string
+          format: uri
+        text:
+          type: string
+
+    Metadata:
+      type: object
+      additionalProperties: true
+
+    SingleUserResponse:
+      type: object
+      required:
+        - data
+        - support
+      properties:
+        data:
+          $ref: '#/components/schemas/User'
+        support:
+          $ref: '#/components/schemas/Support'
+        _meta:
+          $ref: '#/components/schemas/Metadata'
+      additionalProperties: true
+
+    UsersListResponse:
+      type: object
+      required:
+        - page
+        - per_page
+        - total
+        - total_pages
+        - data
+        - support
+      properties:
+        page:
+          type: integer
+        per_page:
+          type: integer
+        total:
+          type: integer
+        total_pages:
+          type: integer
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        support:
+          $ref: '#/components/schemas/Support'
+        _meta:
+          $ref: '#/components/schemas/Metadata'
+      additionalProperties: true
+
+paths:
+  /users/{id}:
+    get:
+      tags:
+        - Users
+      summary: Get user by ID
+      operationId: getUserById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            enum:
+              - 2
+          example: 2
+        - name: x-api-key
+          in: header
+          required: false
+          schema:
+            type: string
+          example: your_reqres_api_key_here
+      responses:
+        '200':
+          description: Existing user found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SingleUserResponse'
+        '404':
+          description: User not found
+
+  /users:
+    get:
+      tags:
+        - Users
+      summary: Get users list
+      operationId: getUsersList
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+          example: 2
+        - name: x-api-key
+          in: header
+          required: false
+          schema:
+            type: string
+          example: your_reqres_api_key_here
+      responses:
+        '200':
+          description: Users list returned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsersListResponse'

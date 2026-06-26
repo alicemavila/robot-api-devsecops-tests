@@ -16,3 +16,5 @@ allure-report/
 # IDE
 .idea/
 .vscode/
+
+schema-coverage.html
