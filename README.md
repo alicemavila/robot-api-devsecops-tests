@@ -1,14 +1,16 @@
 # Robot Framework API Automation Project
 
-Robust API test automation framework built with Robot Framework, Python, RequestsLibrary, Docker and GitHub Actions, following modern QA engineering and CI/CD best practices.
+Robust API test automation framework built with Robot Framework, Python, RequestsLibrary, Docker, Pabot, k6 and GitHub Actions, following modern QA engineering and CI/CD best practices.
 
-This project demonstrates a scalable API automation architecture with reusable components, centralized configurations, JSON Schema validation, negative API testing, Docker-based execution, automated reporting and continuous integration workflows suitable for professional QA portfolios.
+This project demonstrates a scalable API automation architecture with reusable components, centralized configurations, JSON Schema validation, negative API testing, Docker-based execution, parallel test execution, performance smoke testing, automated reporting and continuous integration workflows suitable for professional QA portfolios.
 
 ---
 
 ![Robot Framework](https://img.shields.io/badge/Robot%20Framework-Testing-red)
 ![Python](https://img.shields.io/badge/Python-3.12-blue)
 ![Docker](https://img.shields.io/badge/Docker-Containerized-blue)
+![Pabot](https://img.shields.io/badge/Parallel-Pabot-green)
+![k6](https://img.shields.io/badge/Performance-k6-purple)
 ![GitHub Actions](https://img.shields.io/badge/CI/CD-GitHub%20Actions-black)
 ![Allure Report](https://img.shields.io/badge/Reports-Allure-purple)
 
@@ -26,9 +28,12 @@ This project demonstrates a scalable API automation architecture with reusable c
 * Positive and negative API test scenarios
 * Negative API testing with invalid payloads
 * Smoke and regression execution strategy
+* Parallel test execution with Pabot
+* Performance smoke testing with k6
 * Docker-based test execution
 * Containerized execution with Robot Framework and Allure Report
 * CI/CD pipeline with GitHub Actions
+* Dedicated performance test workflow with GitHub Actions
 * Allure Report integration
 * Automated report publishing with GitHub Pages
 * Artifact generation and storage through GitHub Actions
@@ -46,7 +51,9 @@ This project demonstrates a scalable API automation architecture with reusable c
 | Python          | Support libraries, custom validators and configurations |
 | RequestsLibrary | API requests and validations                            |
 | JSON Schema     | API response contract validation                        |
+| Pabot           | Parallel Robot Framework test execution                 |
 | Docker          | Containerized and reproducible test execution           |
+| k6              | Performance smoke testing                               |
 | GitHub Actions  | Continuous Integration                                  |
 | Allure Report   | Advanced test reporting                                 |
 | ReqRes API      | Test API environment                                    |
@@ -61,10 +68,16 @@ robot-api-devsecops-tests/
 │
 ├── .github/
 │   └── workflows/
-│       └── api-tests.yml
+│       ├── api-tests.yml
+│       └── performance-tests.yml
+│
+├── .vscode/
 │
 ├── assets/
 │   └── allure-report.png
+│
+├── performance/
+│   └── reqres-smoke-performance.js
 │
 ├── resources/
 │   ├── config/
@@ -112,6 +125,8 @@ reports/
 output/
 allure-results/
 allure-report/
+pabot_results/
+.pabotsuitenames
 log.html
 report.html
 output.xml
@@ -160,6 +175,14 @@ output.xml
 * Validate login with empty payload
 * Validate register without password
 * Validate register with empty payload
+
+## Performance Smoke Tests
+
+* Validate API availability under lightweight load
+* Validate HTTP status code
+* Validate response time threshold
+* Validate response body content
+* Validate request failure rate threshold
 
 ---
 
@@ -221,7 +244,7 @@ Create a `.env` file in the project root directory based on the `.env.example` f
 ```env
 ENVIRONMENT=dev
 BASE_URL=https://reqres.in/api
-API_KEY=YOUR_API_KEY
+API_KEY=your_reqres_api_key_here
 DEFAULT_TIMEOUT=30
 VERIFY_SSL=True
 ```
@@ -231,7 +254,7 @@ VERIFY_SSL=True
 ```env
 ENVIRONMENT=dev
 BASE_URL=https://reqres.in/api
-API_KEY=YOUR_API_KEY
+API_KEY=your_reqres_api_key_here
 DEFAULT_TIMEOUT=30
 VERIFY_SSL=True
 ```
@@ -273,7 +296,7 @@ ENVIRONMENT=ci
 
 ---
 
-# Running Tests
+# Running Robot Framework Tests
 
 ## Execute Complete Test Suite
 
@@ -311,6 +334,46 @@ robot -i negative -d reports tests/
 
 ```bash
 run_tests.bat
+```
+
+---
+
+# Parallel Execution with Pabot
+
+This project supports parallel test execution using Pabot.
+
+Pabot allows Robot Framework suites to run in parallel, reducing execution time and improving CI/CD efficiency.
+
+## Run Tests in Parallel
+
+```bash
+pabot --processes 3 --outputdir reports tests/
+```
+
+---
+
+## Run Tests in Parallel with Allure Results
+
+```bash
+pabot --processes 3 --listener "allure_robotframework;reports/allure-results" --outputdir reports tests/
+```
+
+---
+
+## Recommended Parallel Execution Strategy
+
+For this project, the recommended strategy is to run tests in parallel by suite:
+
+```bash
+pabot --processes 3 --listener "allure_robotframework;reports/allure-results" --outputdir reports tests/
+```
+
+This avoids unnecessary conflicts between test cases and keeps execution stable.
+
+Expected execution result:
+
+```text
+15 tests, 15 passed, 0 failed
 ```
 
 ---
@@ -421,6 +484,14 @@ tests/
 
 ---
 
+## Generate Allure Results with Parallel Execution
+
+```bash
+pabot --processes 3 --listener "allure_robotframework;reports/allure-results" --outputdir reports tests/
+```
+
+---
+
 ## Generate Allure Report
 
 ```bash
@@ -449,6 +520,86 @@ allure serve reports/allure-results
 
 ---
 
+# Performance Testing with k6
+
+This project includes a lightweight performance smoke test using k6.
+
+The goal of this test is not to generate heavy load against a public API. Instead, it validates basic performance expectations in a controlled and responsible way for QA portfolio purposes.
+
+Performance test file:
+
+```bash
+performance/reqres-smoke-performance.js
+```
+
+## Performance Test Validations
+
+The k6 test validates:
+
+* HTTP status code is 200
+* Response time is acceptable
+* Response body contains user data
+* Request failure rate stays below the configured threshold
+* 95th percentile response time stays below the configured threshold
+
+---
+
+## Run Performance Test with Docker
+
+### Windows PowerShell
+
+```powershell
+docker run --rm -i -v ${PWD}:/app -w /app -e BASE_URL="https://reqres.in/api" -e "API_KEY=$env:API_KEY" grafana/k6 run performance/reqres-smoke-performance.js
+```
+
+### Windows CMD
+
+```bash
+docker run --rm -i -v %cd%:/app -w /app -e BASE_URL="https://reqres.in/api" -e API_KEY=%API_KEY% grafana/k6 run performance/reqres-smoke-performance.js
+```
+
+### Linux / Mac
+
+```bash
+docker run --rm -i -v "$(pwd)":/app -w /app -e BASE_URL="https://reqres.in/api" -e API_KEY="$API_KEY" grafana/k6 run performance/reqres-smoke-performance.js
+```
+
+---
+
+## Run a Single k6 Iteration for Debugging
+
+```bash
+docker run --rm -i -v ${PWD}:/app -w /app -e BASE_URL="https://reqres.in/api" -e "API_KEY=$env:API_KEY" grafana/k6 run --vus 1 --iterations 1 performance/reqres-smoke-performance.js
+```
+
+---
+
+## Expected k6 Result
+
+```text
+checks_succeeded...: 100.00%
+checks_failed......: 0.00%
+http_req_failed....: 0.00%
+status is 200......: passed
+response time is acceptable
+response contains user data
+```
+
+Example validated result:
+
+```text
+checks_succeeded...: 100.00%
+checks_failed......: 0.00%
+http_req_failed....: 0.00%
+http_req_duration...: p(95)=599.85ms
+```
+
+> A valid ReqRes API key is required to run the performance test successfully.
+>
+> Do not hardcode the API key in the test file. Use environment variables locally and GitHub Secrets in CI/CD.
+
+---
+
 # Live Reports
 
 ## GitHub Pages
@@ -465,7 +616,9 @@ https://alicemavila.github.io/robot-api-devsecops-tests/
 
 This project uses GitHub Actions for automated execution and reporting.
 
-Pipeline execution includes:
+## API Test Pipeline
+
+The API test pipeline includes:
 
 * Repository checkout
 * Python setup
@@ -477,6 +630,29 @@ Pipeline execution includes:
 * Robot Framework report artifact upload
 * Allure report artifact upload
 * GitHub Pages deployment
+
+Workflow file:
+
+```bash
+.github/workflows/api-tests.yml
+```
+
+---
+
+## Performance Test Pipeline
+
+The performance test pipeline includes:
+
+* Repository checkout
+* k6 setup
+* Execution of the k6 smoke performance test
+* Validation of performance thresholds
+
+Workflow file:
+
+```bash
+.github/workflows/performance-tests.yml
+```
 
 ---
 
@@ -493,7 +669,7 @@ Recommended values:
 
 ```text
 BASE_URL=https://reqres.in/api
-API_KEY=YOUR_API_KEY
+API_KEY=your_reqres_api_key_here
 ```
 
 To configure them:
@@ -539,6 +715,18 @@ resources/config/endpoints.py
 
 ---
 
+# Implemented Improvements
+
+* Docker support
+* JSON Schema validation
+* Parallel execution with Pabot
+* Performance smoke testing with k6
+* Robot Framework LSP configuration with `robot.toml`
+* Generated reports removed from version control
+* Environment configuration through `.env` and GitHub Secrets
+
+---
+
 # Best Practices Applied
 
 * Modular architecture
@@ -552,9 +740,13 @@ resources/config/endpoints.py
 * Sensitive data protection with `.env` and GitHub Secrets
 * JSON Schema validation
 * Positive and negative test coverage
+* Security-oriented API validations
+* Parallel execution strategy
+* Lightweight performance smoke testing
 * Docker-based execution
 * Reproducible test environment with containers
 * CI/CD automation
+* Dedicated API and performance pipelines
 * Tagging strategy
 * Scalable framework structure
 * Automated reporting
@@ -571,14 +763,16 @@ This project uses the public ReqRes API as a test environment.
 
 Because it depends on a public API, responses and availability may vary depending on the service status, authentication rules or usage limits.
 
-The goal of this project is to demonstrate API test automation practices, project organization, schema validation, negative testing, Docker-based execution, CI/CD integration and reporting strategy for QA portfolio purposes.
+A valid ReqRes API key is required for authenticated requests.
+
+The goal of this project is to demonstrate API test automation practices, project organization, schema validation, negative testing, Docker-based execution, parallel execution, CI/CD integration, performance smoke testing and reporting strategy for QA portfolio purposes.
+
+This project does not perform heavy load testing against the public API. The k6 scenario is intentionally lightweight and designed as a smoke performance validation.
 
 ---
 
 # Future Improvements
 
-* Parallel execution
-* Performance testing integration
 * API contract testing
 * Database validation layer
 * Authorization validation by user role
@@ -604,6 +798,7 @@ QA Engineer focused on:
 * API Testing
 * Robot Framework
 * Docker-based Test Execution
+* Performance Testing
 * CI/CD Pipelines
 * Software Quality Engineering
 
