@@ -130,20 +130,14 @@ Login Without Password
     RETURN    ${response}
 
 Request User Without API Key
-    ${response}=    GET On Session
-    ...    reqres_no_key
-    ...    ${USERS_ENDPOINT}/2
-    ...    expected_status=401
-
-    RETURN    ${response}
+    ${response}=    GET On Session    reqres_no_key    ${USERS_ENDPOINT}/2    expected_status=401
+    Should Be Equal As Integers    ${response.status_code}    401
+    [Return]    ${response}
 
 Request User With Invalid API Key
-    ${response}=    GET On Session
-    ...    reqres_invalid_key
-    ...    ${USERS_ENDPOINT}/2
-    ...    expected_status=403
-
-    RETURN    ${response}
+    ${response}=    GET On Session    reqres_invalid_key    ${USERS_ENDPOINT}/2    expected_status=403
+    Should Be Equal As Integers    ${response.status_code}    403
+    [Return]    ${response}
 
 Validate Existing User Response
     [Arguments]    ${body}
