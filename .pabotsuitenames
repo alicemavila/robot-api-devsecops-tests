@@ -1,8 +1,0 @@
-datasources:ce5a393811ae60e26fbf00e67118db3707aad46b
-commandlineoptions:1fa558ac127898001593fa1dd9565a011852f637
-suitesfrom:no-suites-from-option
-file:e027622b5470cbfa7f6a1bc831db11b170d77bed
---suite Tests.Auth Test
---suite Tests.Negative Test
---suite Tests.Security Test
---suite Tests.Users Test

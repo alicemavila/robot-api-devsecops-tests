@@ -1,0 +1,11 @@
+# Generated reports should not affect GitHub language statistics
+schema-coverage.html linguist-generated
+reports/** linguist-generated
+output/** linguist-generated
+allure-results/** linguist-generated
+allure-report/** linguist-generated
+pabot_results/** linguist-generated
+
+# Robot Framework report files
+log.html linguist-generated
+report.html linguist-generated

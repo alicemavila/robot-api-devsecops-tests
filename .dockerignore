@@ -1,17 +1,22 @@
 .git
 .github
-venv
-.venv
-__pycache__
-*.pyc
-.env
 
-reports
-output
-allure-results
-allure-report
+venv/
+.venv/
+__pycache__/
+*.pyc
+
+.env
+reports/
+output/
+pabot_results/
+allure-results/
+allure-report/
+
 log.html
 report.html
 output.xml
+schema-coverage.html
 
-README.md
+.idea/
+.vscode/
