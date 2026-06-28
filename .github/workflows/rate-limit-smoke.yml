@@ -1,0 +1,37 @@
+name: Rate Limit Smoke Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  rate-limit-smoke:
+    runs-on: ubuntu-latest
+
+    env:
+      BASE_URL: ${{ secrets.BASE_URL }}
+      API_KEY: ${{ secrets.API_KEY }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate required secrets
+        run: |
+          if [ -z "$BASE_URL" ]; then
+            echo "BASE_URL secret is missing."
+            exit 1
+          fi
+
+          if [ -z "$API_KEY" ]; then
+            echo "API_KEY secret is missing."
+            exit 1
+          fi
+
+      - name: Run controlled rate limit smoke test
+        run: |
+          docker run --rm \
+            -v "$PWD:/app" \
+            -w /app \
+            -e BASE_URL="$BASE_URL" \
+            -e API_KEY="$API_KEY" \
+            grafana/k6 run performance/rate-limit-smoke.js

@@ -2,7 +2,7 @@
 
 Robust API test automation framework built with Robot Framework, Python, RequestsLibrary, Docker, Pabot, k6, OpenAPI, Schemathesis and GitHub Actions, following modern QA engineering and CI/CD best practices.
 
-This project demonstrates a scalable API automation architecture with reusable components, centralized configurations, JSON Schema validation, API contract testing, negative API testing, Docker-based execution, parallel test execution, performance smoke testing, automated reporting and continuous integration workflows suitable for professional QA portfolios.
+This project demonstrates a scalable API automation architecture with reusable components, centralized configurations, JSON Schema validation, API contract testing, negative API testing, Docker-based execution, parallel test execution, performance smoke testing, controlled rate limit validation, automated reporting and continuous integration workflows suitable for professional QA portfolios.
 
 ---
 
@@ -37,12 +37,14 @@ This project demonstrates a scalable API automation architecture with reusable c
 * Security-oriented API validations
 * Parallel test execution with Pabot
 * Performance smoke testing with k6
+* Controlled rate limit smoke validation with k6
 * Docker-based test execution
 * Containerized execution with Robot Framework and Allure Report
 * CI/CD pipeline with GitHub Actions
 * Dedicated API test workflow with GitHub Actions
 * Dedicated contract test workflow with GitHub Actions
 * Dedicated performance test workflow with GitHub Actions
+* Manual rate limit smoke workflow with GitHub Actions
 * Allure Report integration
 * Automated report publishing with GitHub Pages
 * Artifact generation and storage through GitHub Actions
@@ -65,7 +67,7 @@ This project demonstrates a scalable API automation architecture with reusable c
 | Schemathesis    | API contract testing based on OpenAPI                   |
 | Pabot           | Parallel Robot Framework test execution                 |
 | Docker          | Containerized and reproducible test execution           |
-| k6              | Performance smoke testing                               |
+| k6              | Performance and controlled rate limit smoke testing     |
 | GitHub Actions  | Continuous Integration                                  |
 | Allure Report   | Advanced test reporting                                 |
 | GitHub Pages    | Published test report hosting                           |
@@ -83,7 +85,8 @@ robot-api-devsecops-tests/
 │   └── workflows/
 │       ├── api-tests.yml
 │       ├── contract-tests.yml
-│       └── performance-tests.yml
+│       ├── performance-tests.yml
+│       └── rate-limit-smoke.yml
 │
 ├── .vscode/
 │
@@ -94,6 +97,7 @@ robot-api-devsecops-tests/
 │   └── openapi.yaml
 │
 ├── performance/
+│   ├── rate-limit-smoke.js
 │   └── reqres-smoke-performance.js
 │
 ├── resources/
@@ -237,6 +241,25 @@ No issues found
 * Validate response body content
 * Validate request failure rate threshold
 * Validate 95th percentile response time threshold
+
+## Controlled Rate Limit Smoke Tests
+
+* Validate small controlled request bursts
+* Validate that the API does not return server errors
+* Validate response time under a controlled threshold
+* Validate successful `200` responses
+* Accept explicit `429 Too Many Requests` responses as controlled rate limit behavior when returned
+* Avoid aggressive traffic against the public API
+
+Expected controlled rate limit smoke result:
+
+```text
+checks_succeeded.....: 100.00%
+checks_failed........: 0.00%
+http_req_failed......: 0.00%
+server_errors........: 0
+successful_responses.: 10
+```
 
 ---
 
@@ -649,25 +672,37 @@ allure serve reports/allure-results
 
 # Performance Testing with k6
 
-This project includes a lightweight performance smoke test using k6.
+This project includes lightweight performance smoke testing using k6.
 
-The goal of this test is not to generate heavy load against a public API. Instead, it validates basic performance expectations in a controlled and responsible way for QA portfolio purposes.
+The goal of these tests is not to generate heavy load against a public API. Instead, they validate basic performance expectations and controlled rate limit behavior in a responsible way for QA portfolio purposes.
 
-Performance test file:
+Performance test files:
 
 ```bash
 performance/reqres-smoke-performance.js
+performance/rate-limit-smoke.js
 ```
 
 ## Performance Test Validations
 
-The k6 test validates:
+The k6 performance smoke test validates:
 
 * HTTP status code is 200
 * Response time is acceptable
 * Response body contains user data
 * Request failure rate stays below the configured threshold
 * 95th percentile response time stays below the configured threshold
+
+## Controlled Rate Limit Test Validations
+
+The controlled rate limit smoke test validates:
+
+* Small controlled request bursts
+* No server errors
+* Response time below the configured threshold
+* Successful `200` responses
+* Explicit `429` responses when the API applies rate limiting
+* Responsible execution without stressing the public API
 
 ---
 
@@ -693,6 +728,28 @@ docker run --rm -i -v "$(pwd)":/app -w /app -e BASE_URL="https://reqres.in/api" 
 
 ---
 
+## Run Controlled Rate Limit Smoke Test with Docker
+
+### Windows PowerShell
+
+```powershell
+docker run --rm --env-file .env -i -v ${PWD}:/app -w /app grafana/k6 run performance/rate-limit-smoke.js
+```
+
+### Windows CMD
+
+```bash
+docker run --rm --env-file .env -i -v %cd%:/app -w /app grafana/k6 run performance/rate-limit-smoke.js
+```
+
+### Linux / Mac
+
+```bash
+docker run --rm --env-file .env -i -v "$(pwd)":/app -w /app grafana/k6 run performance/rate-limit-smoke.js
+```
+
+---
+
 ## Run a Single k6 Iteration for Debugging
 
 ### Windows PowerShell
@@ -703,7 +760,7 @@ docker run --rm -i -v ${PWD}:/app -w /app -e BASE_URL="https://reqres.in/api" -e
 
 ---
 
-## Expected k6 Result
+## Expected k6 Performance Result
 
 ```text
 checks_succeeded.....: 100.00%
@@ -723,9 +780,19 @@ http_req_failed......: 0.00%
 http_req_duration....: p(95)=599.85ms
 ```
 
-> A valid ReqRes API key is required to run the performance test successfully.
+## Expected Controlled Rate Limit Result
+
+```text
+checks_succeeded.....: 100.00%
+checks_failed........: 0.00%
+http_req_failed......: 0.00%
+server_errors........: 0
+successful_responses.: 10
+```
+
+> A valid ReqRes API key is required to run the performance and rate limit smoke tests successfully.
 >
-> Do not hardcode the API key in the test file. Use environment variables locally and GitHub Secrets in CI/CD.
+> Do not hardcode the API key in the test files. Use environment variables locally and GitHub Secrets in CI/CD.
 
 ---
 
@@ -803,6 +870,26 @@ Workflow file:
 
 ---
 
+## Rate Limit Smoke Pipeline
+
+The rate limit smoke pipeline includes:
+
+* Repository checkout
+* Required secret validation
+* Controlled k6 rate limit smoke execution
+* Validation that no server errors are returned
+* Validation of successful or explicitly rate-limited responses
+
+This workflow is intentionally configured for manual execution to avoid unnecessary traffic against the public API.
+
+Workflow file:
+
+```bash
+.github/workflows/rate-limit-smoke.yml
+```
+
+---
+
 # GitHub Secrets
 
 The following secrets should be configured in GitHub Actions:
@@ -873,6 +960,8 @@ resources/config/endpoints.py
 * Controlled example-based contract test execution
 * Parallel execution with Pabot
 * Performance smoke testing with k6
+* Controlled rate limit smoke validation without stressing the public API
+* Manual rate limit smoke workflow with GitHub Actions
 * Dedicated API test workflow with GitHub Actions
 * Dedicated performance test workflow with GitHub Actions
 * API key authorization validation
@@ -902,10 +991,11 @@ resources/config/endpoints.py
 * Security-oriented API validations
 * Parallel execution strategy
 * Lightweight performance smoke testing
+* Controlled rate limit smoke validation
 * Docker-based execution
 * Reproducible test environment with containers
 * CI/CD automation
-* Dedicated API, contract and performance pipelines
+* Dedicated API, contract, performance and rate limit pipelines
 * Tagging strategy
 * Scalable framework structure
 * Automated reporting
@@ -925,11 +1015,11 @@ Because it depends on a public API, responses and availability may vary dependin
 
 A valid ReqRes API key is required for authenticated requests.
 
-The goal of this project is to demonstrate API test automation practices, project organization, schema validation, contract testing, negative testing, Docker-based execution, parallel execution, CI/CD integration, performance smoke testing and reporting strategy for QA portfolio purposes.
+The goal of this project is to demonstrate API test automation practices, project organization, schema validation, contract testing, negative testing, Docker-based execution, parallel execution, CI/CD integration, performance smoke testing, controlled rate limit validation and reporting strategy for QA portfolio purposes.
 
-This project does not perform heavy load testing against the public API. The k6 scenario is intentionally lightweight and designed as a smoke performance validation.
+This project does not perform heavy load testing against the public API. The k6 scenarios are intentionally lightweight and designed as smoke performance validations.
 
-This project does not perform aggressive fuzzing, stateful testing or rate limit stress testing against the public API. Contract tests are configured to run controlled positive examples to keep the execution stable, responsible and suitable for CI/CD.
+This project does not perform aggressive fuzzing, stateful testing or rate limit stress testing against the public API. Contract tests are configured to run controlled positive examples, and the rate limit smoke test is configured as a controlled and responsible validation.
 
 Database validation and role-based authorization validation require a controlled API and database environment. They are intentionally not forced into this public API project.
 
@@ -937,7 +1027,6 @@ Database validation and role-based authorization validation require a controlled
 
 # Future Improvements
 
-* Add controlled rate limit validation without stressing the public API
 * Expand contract testing with additional controlled scenarios when using a private or local API environment
 * Add role-based authorization tests using a dedicated API with user roles
 * Add database validation layer in a future controlled local API project
