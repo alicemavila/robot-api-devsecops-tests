@@ -1,8 +1,8 @@
 # Robot Framework API Automation Project
 
-Robust API test automation framework built with Robot Framework, Python, RequestsLibrary, Docker, Pabot, k6 and GitHub Actions, following modern QA engineering and CI/CD best practices.
+Robust API test automation framework built with Robot Framework, Python, RequestsLibrary, Docker, Pabot, k6, OpenAPI, Schemathesis and GitHub Actions, following modern QA engineering and CI/CD best practices.
 
-This project demonstrates a scalable API automation architecture with reusable components, centralized configurations, JSON Schema validation, negative API testing, Docker-based execution, parallel test execution, performance smoke testing, automated reporting and continuous integration workflows suitable for professional QA portfolios.
+This project demonstrates a scalable API automation architecture with reusable components, centralized configurations, JSON Schema validation, API contract testing, negative API testing, Docker-based execution, parallel test execution, performance smoke testing, automated reporting and continuous integration workflows suitable for professional QA portfolios.
 
 ---
 
@@ -11,6 +11,8 @@ This project demonstrates a scalable API automation architecture with reusable c
 ![Docker](https://img.shields.io/badge/Docker-Containerized-blue)
 ![Pabot](https://img.shields.io/badge/Parallel-Pabot-green)
 ![k6](https://img.shields.io/badge/Performance-k6-purple)
+![OpenAPI](https://img.shields.io/badge/Contract-OpenAPI-green)
+![Schemathesis](https://img.shields.io/badge/Contract%20Testing-Schemathesis-blueviolet)
 ![GitHub Actions](https://img.shields.io/badge/CI/CD-GitHub%20Actions-black)
 ![Allure Report](https://img.shields.io/badge/Reports-Allure-purple)
 
@@ -22,23 +24,31 @@ This project demonstrates a scalable API automation architecture with reusable c
 * Modular and scalable project architecture
 * Reusable Robot Framework keywords
 * Centralized payload and endpoint management
+* Centralized API endpoint configuration
 * Environment-based configuration
 * Multi-environment execution support
 * JSON Schema response validation
+* OpenAPI contract definition
+* API contract testing with Schemathesis
 * Positive and negative API test scenarios
 * Negative API testing with invalid payloads
 * Smoke and regression execution strategy
+* API key authorization validation
+* Security-oriented API validations
 * Parallel test execution with Pabot
 * Performance smoke testing with k6
 * Docker-based test execution
 * Containerized execution with Robot Framework and Allure Report
 * CI/CD pipeline with GitHub Actions
+* Dedicated API test workflow with GitHub Actions
+* Dedicated contract test workflow with GitHub Actions
 * Dedicated performance test workflow with GitHub Actions
 * Allure Report integration
 * Automated report publishing with GitHub Pages
 * Artifact generation and storage through GitHub Actions
+* Generated reports excluded from version control
+* Generated HTML reports excluded from GitHub language statistics
 * Clean and maintainable test structure
-* Security-oriented API validations
 * Robot Framework LSP configuration with `robot.toml`
 
 ---
@@ -50,13 +60,16 @@ This project demonstrates a scalable API automation architecture with reusable c
 | Robot Framework | Test automation framework                               |
 | Python          | Support libraries, custom validators and configurations |
 | RequestsLibrary | API requests and validations                            |
-| JSON Schema     | API response contract validation                        |
+| JSON Schema     | API response schema validation                          |
+| OpenAPI         | API contract definition                                 |
+| Schemathesis    | API contract testing based on OpenAPI                   |
 | Pabot           | Parallel Robot Framework test execution                 |
 | Docker          | Containerized and reproducible test execution           |
 | k6              | Performance smoke testing                               |
 | GitHub Actions  | Continuous Integration                                  |
 | Allure Report   | Advanced test reporting                                 |
-| ReqRes API      | Test API environment                                    |
+| GitHub Pages    | Published test report hosting                           |
+| ReqRes API      | Public API used as test environment                     |
 | dotenv          | Environment variable management                         |
 
 ---
@@ -69,12 +82,16 @@ robot-api-devsecops-tests/
 ├── .github/
 │   └── workflows/
 │       ├── api-tests.yml
+│       ├── contract-tests.yml
 │       └── performance-tests.yml
 │
 ├── .vscode/
 │
 ├── assets/
 │   └── allure-report.png
+│
+├── contract/
+│   └── openapi.yaml
 │
 ├── performance/
 │   └── reqres-smoke-performance.js
@@ -108,12 +125,14 @@ robot-api-devsecops-tests/
 │
 ├── .dockerignore
 ├── .env.example
+├── .gitattributes
 ├── .gitignore
 ├── Dockerfile
+├── README.md
 ├── requirements.txt
 ├── robot.toml
 ├── run_tests.bat
-└── README.md
+└── schemathesis.toml
 ```
 
 > Test reports and execution outputs are generated locally, through Docker or by GitHub Actions and should not be committed to the repository.
@@ -130,8 +149,12 @@ pabot_results/
 log.html
 report.html
 output.xml
+schema-coverage.html
+.hypothesis/
 .env
 ```
+
+The `.gitattributes` file is used to mark generated reports as generated files, preventing generated HTML reports from affecting GitHub language statistics.
 
 ---
 
@@ -148,6 +171,7 @@ output.xml
 
 * Validate request without API key
 * Validate request with invalid API key
+* Validate API key authorization behavior
 * Validate security headers
 
 ## User API Tests
@@ -176,6 +200,47 @@ output.xml
 * Validate register without password
 * Validate register with empty payload
 
+## API Contract Tests
+
+This project includes an OpenAPI contract used by Schemathesis for automated API contract testing.
+
+Contract file:
+
+```bash
+contract/openapi.yaml
+```
+
+Schemathesis configuration file:
+
+```bash
+schemathesis.toml
+```
+
+The current API contract covers the following operations:
+
+```text
+GET    /users
+GET    /users/{id}
+POST   /users
+PUT    /users/{id}
+DELETE /users/{id}
+POST   /login
+POST   /register
+```
+
+The Schemathesis execution is intentionally configured to run controlled positive example-based contract tests against the public ReqRes API.
+
+This keeps the contract testing useful for portfolio and CI/CD purposes without applying aggressive fuzzing or heavy traffic against a public third-party API.
+
+Expected contract test result:
+
+```text
+7 operations selected
+7 examples generated
+7 examples passed
+No issues found
+```
+
 ## Performance Smoke Tests
 
 * Validate API availability under lightweight load
@@ -183,6 +248,7 @@ output.xml
 * Validate response time threshold
 * Validate response body content
 * Validate request failure rate threshold
+* Validate 95th percentile response time threshold
 
 ---
 
@@ -282,6 +348,12 @@ The environment configuration is managed in:
 resources/config/variables.py
 ```
 
+Endpoint configuration is managed in:
+
+```bash
+resources/config/endpoints.py
+```
+
 The default environment is:
 
 ```env
@@ -330,6 +402,14 @@ robot -i negative -d reports tests/
 
 ---
 
+## Execute Security Tests
+
+```bash
+robot -i security -d reports tests/
+```
+
+---
+
 ## Execute Tests Using Windows Batch File
 
 ```bash
@@ -370,12 +450,6 @@ pabot --processes 3 --listener "allure_robotframework;reports/allure-results" --
 
 This avoids unnecessary conflicts between test cases and keeps execution stable.
 
-Expected execution result:
-
-```text
-15 tests, 15 passed, 0 failed
-```
-
 ---
 
 # Docker Execution
@@ -414,12 +488,6 @@ docker run --rm --env-file .env -v "$(pwd)/reports:/app/reports" robot-api-devse
 
 The Docker execution runs the full Robot Framework test suite and generates Robot Framework reports and Allure report files inside the `reports` directory.
 
-Expected execution result:
-
-```text
-15 tests, 15 passed, 0 failed
-```
-
 ---
 
 ## Docker Reports
@@ -451,6 +519,61 @@ Then access:
 ```text
 http://localhost:8080
 ```
+
+---
+
+# API Contract Testing with Schemathesis
+
+This project includes API contract testing using Schemathesis and an OpenAPI 3.0 contract.
+
+The OpenAPI contract is stored in:
+
+```bash
+contract/openapi.yaml
+```
+
+The Schemathesis configuration is stored in:
+
+```bash
+schemathesis.toml
+```
+
+The contract testing configuration uses:
+
+* Positive example-based execution
+* API key header authentication
+* User-Agent header for public API compatibility
+* Disabled heavy fuzzing against the public API
+* Disabled stateful testing against the public API
+* Controlled execution suitable for CI/CD and portfolio demonstration
+
+## Run Contract Tests with Docker
+
+```bash
+docker run --rm --env-file .env robot-api-devsecops-tests schemathesis run contract/openapi.yaml --url https://reqres.in/api
+```
+
+## Run Contract Tests Locally
+
+```bash
+schemathesis run contract/openapi.yaml --url https://reqres.in/api
+```
+
+## Expected Schemathesis Result
+
+```text
+Loaded specification from contract/openapi.yaml
+Operations: 7 selected / 7 total
+Examples: 7 passed
+Coverage: disabled
+Fuzzing: disabled
+Stateful: disabled
+No issues found
+```
+
+> A valid ReqRes API key is required to run the contract tests successfully.
+>
+> Do not hardcode the API key in the OpenAPI file or in the Schemathesis configuration. Use `.env` locally and GitHub Secrets in CI/CD.
 
 ---
 
@@ -568,7 +691,9 @@ docker run --rm -i -v "$(pwd)":/app -w /app -e BASE_URL="https://reqres.in/api" 
 
 ## Run a Single k6 Iteration for Debugging
 
-```bash
+### Windows PowerShell
+
+```powershell
 docker run --rm -i -v ${PWD}:/app -w /app -e BASE_URL="https://reqres.in/api" -e "API_KEY=$env:API_KEY" grafana/k6 run --vus 1 --iterations 1 performance/reqres-smoke-performance.js
 ```
 
@@ -577,10 +702,10 @@ docker run --rm -i -v ${PWD}:/app -w /app -e BASE_URL="https://reqres.in/api" -e
 ## Expected k6 Result
 
 ```text
-checks_succeeded...: 100.00%
-checks_failed......: 0.00%
-http_req_failed....: 0.00%
-status is 200......: passed
+checks_succeeded.....: 100.00%
+checks_failed........: 0.00%
+http_req_failed......: 0.00%
+status is 200........: passed
 response time is acceptable
 response contains user data
 ```
@@ -588,10 +713,10 @@ response contains user data
 Example validated result:
 
 ```text
-checks_succeeded...: 100.00%
-checks_failed......: 0.00%
-http_req_failed....: 0.00%
-http_req_duration...: p(95)=599.85ms
+checks_succeeded.....: 100.00%
+checks_failed........: 0.00%
+http_req_failed......: 0.00%
+http_req_duration....: p(95)=599.85ms
 ```
 
 > A valid ReqRes API key is required to run the performance test successfully.
@@ -635,6 +760,24 @@ Workflow file:
 
 ```bash
 .github/workflows/api-tests.yml
+```
+
+---
+
+## Contract Test Pipeline
+
+The contract test pipeline includes:
+
+* Repository checkout
+* API key secret validation
+* Docker image build
+* Schemathesis contract test execution
+* OpenAPI contract validation using controlled positive examples
+
+Workflow file:
+
+```bash
+.github/workflows/contract-tests.yml
 ```
 
 ---
@@ -702,6 +845,30 @@ Schema validation helps ensure that API responses follow the expected structure,
 
 ---
 
+# OpenAPI Contract Validation
+
+This project also includes an OpenAPI contract for automated API contract testing.
+
+Contract file:
+
+```bash
+contract/openapi.yaml
+```
+
+The OpenAPI contract currently documents:
+
+* User listing
+* Single user retrieval
+* User creation
+* User update
+* User deletion
+* Login
+* Register
+
+Schemathesis uses this contract to validate that the API behavior is aligned with the documented contract.
+
+---
+
 # Robot Framework LSP Configuration
 
 This project includes a `robot.toml` file to improve Robot Framework Language Server support in editors such as VSCode.
@@ -719,10 +886,20 @@ resources/config/endpoints.py
 
 * Docker support
 * JSON Schema validation
+* OpenAPI contract definition
+* API contract testing with Schemathesis
+* Expanded contract coverage for 7 API operations
+* Dedicated contract testing workflow with GitHub Actions
+* Controlled example-based contract test execution
 * Parallel execution with Pabot
 * Performance smoke testing with k6
+* Dedicated API test workflow with GitHub Actions
+* Dedicated performance test workflow with GitHub Actions
+* API key authorization validation
+* Security-oriented API validation
 * Robot Framework LSP configuration with `robot.toml`
 * Generated reports removed from version control
+* Generated HTML reports excluded from GitHub language statistics
 * Environment configuration through `.env` and GitHub Secrets
 
 ---
@@ -733,12 +910,14 @@ resources/config/endpoints.py
 * Separation of concerns
 * Reusable keywords
 * Centralized configurations
+* Centralized endpoint management
 * Centralized payload management
 * Centralized schema management
 * Environment isolation
 * Multi-environment support
 * Sensitive data protection with `.env` and GitHub Secrets
 * JSON Schema validation
+* OpenAPI contract testing
 * Positive and negative test coverage
 * Security-oriented API validations
 * Parallel execution strategy
@@ -746,13 +925,14 @@ resources/config/endpoints.py
 * Docker-based execution
 * Reproducible test environment with containers
 * CI/CD automation
-* Dedicated API and performance pipelines
+* Dedicated API, contract and performance pipelines
 * Tagging strategy
 * Scalable framework structure
 * Automated reporting
 * Clean code principles
 * Maintainable test design
 * Generated reports excluded from version control
+* Generated files excluded from GitHub language statistics
 * Editor/LSP configuration for improved maintainability
 
 ---
@@ -765,18 +945,22 @@ Because it depends on a public API, responses and availability may vary dependin
 
 A valid ReqRes API key is required for authenticated requests.
 
-The goal of this project is to demonstrate API test automation practices, project organization, schema validation, negative testing, Docker-based execution, parallel execution, CI/CD integration, performance smoke testing and reporting strategy for QA portfolio purposes.
+The goal of this project is to demonstrate API test automation practices, project organization, schema validation, contract testing, negative testing, Docker-based execution, parallel execution, CI/CD integration, performance smoke testing and reporting strategy for QA portfolio purposes.
 
 This project does not perform heavy load testing against the public API. The k6 scenario is intentionally lightweight and designed as a smoke performance validation.
+
+This project does not perform aggressive fuzzing, stateful testing or rate limit stress testing against the public API. Contract tests are configured to run controlled positive examples to keep the execution stable, responsible and suitable for CI/CD.
+
+Database validation and role-based authorization validation require a controlled API and database environment. They are intentionally not forced into this public API project.
 
 ---
 
 # Future Improvements
 
-* API contract testing
-* Database validation layer
-* Authorization validation by user role
-* Rate limit validation
+* Add controlled rate limit validation without stressing the public API
+* Expand contract testing with additional controlled scenarios when using a private or local API environment
+* Add role-based authorization tests using a dedicated API with user roles
+* Add database validation layer in a future controlled local API project
 
 ---
 
@@ -798,12 +982,19 @@ QA Engineer focused on:
 * API Testing
 * Robot Framework
 * Docker-based Test Execution
+* Contract Testing
 * Performance Testing
 * CI/CD Pipelines
 * Software Quality Engineering
 
 GitHub:
+
+```text
 https://github.com/alicemavila
+```
 
 LinkedIn:
+
+```text
 https://www.linkedin.com/in/alice-m-223157119/
+```
