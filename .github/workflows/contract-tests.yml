@@ -1,0 +1,52 @@
+name: Contract Tests
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "contract/**"
+      - "schemathesis.toml"
+      - "requirements.txt"
+      - "Dockerfile"
+      - ".github/workflows/contract-tests.yml"
+
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "contract/**"
+      - "schemathesis.toml"
+      - "requirements.txt"
+      - "Dockerfile"
+      - ".github/workflows/contract-tests.yml"
+
+  workflow_dispatch:
+
+jobs:
+  contract-tests:
+    runs-on: ubuntu-latest
+
+    env:
+      API_KEY: ${{ secrets.API_KEY }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate required secrets
+        run: |
+          if [ -z "$API_KEY" ]; then
+            echo "API_KEY secret is missing."
+            exit 1
+          fi
+
+      - name: Build Docker image
+        run: docker build -t robot-api-devsecops-tests .
+
+      - name: Run API contract tests with Schemathesis
+        run: |
+          docker run --rm \
+            -e API_KEY="$API_KEY" \
+            robot-api-devsecops-tests \
+            schemathesis run contract/openapi.yaml --url https://reqres.in/api
