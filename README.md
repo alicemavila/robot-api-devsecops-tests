@@ -202,19 +202,11 @@ The `.gitattributes` file is used to mark generated reports as generated files, 
 
 ## API Contract Tests
 
-This project includes an OpenAPI contract used by Schemathesis for automated API contract testing.
-
-Contract file:
-
-```bash
-contract/openapi.yaml
-```
-
-Schemathesis configuration file:
-
-```bash
-schemathesis.toml
-```
+* Validate the OpenAPI contract using Schemathesis
+* Validate documented API operations
+* Validate expected response schemas and status codes
+* Execute controlled positive example-based contract tests
+* Avoid aggressive fuzzing or heavy traffic against the public API
 
 The current API contract covers the following operations:
 
@@ -227,10 +219,6 @@ DELETE /users/{id}
 POST   /login
 POST   /register
 ```
-
-The Schemathesis execution is intentionally configured to run controlled positive example-based contract tests against the public ReqRes API.
-
-This keeps the contract testing useful for portfolio and CI/CD purposes without applying aggressive fuzzing or heavy traffic against a public third-party API.
 
 Expected contract test result:
 
@@ -522,20 +510,36 @@ http://localhost:8080
 
 ---
 
-# API Contract Testing with Schemathesis
+# API Contract Testing with OpenAPI and Schemathesis
 
-This project includes API contract testing using Schemathesis and an OpenAPI 3.0 contract.
+This project includes API contract testing using an OpenAPI 3.0 contract and Schemathesis.
 
-The OpenAPI contract is stored in:
+The OpenAPI contract defines the expected API operations, request bodies, response structures and status codes.
+
+Contract file:
 
 ```bash
 contract/openapi.yaml
 ```
 
-The Schemathesis configuration is stored in:
+Schemathesis uses this contract to automatically execute controlled contract tests and validate that the API behavior is aligned with the documented specification.
+
+Schemathesis configuration file:
 
 ```bash
 schemathesis.toml
+```
+
+The current API contract covers the following operations:
+
+```text
+GET    /users
+GET    /users/{id}
+POST   /users
+PUT    /users/{id}
+DELETE /users/{id}
+POST   /login
+POST   /register
 ```
 
 The contract testing configuration uses:
@@ -842,30 +846,6 @@ resources/libraries/schema_validator.py
 ```
 
 Schema validation helps ensure that API responses follow the expected structure, required fields and data types.
-
----
-
-# OpenAPI Contract Validation
-
-This project also includes an OpenAPI contract for automated API contract testing.
-
-Contract file:
-
-```bash
-contract/openapi.yaml
-```
-
-The OpenAPI contract currently documents:
-
-* User listing
-* Single user retrieval
-* User creation
-* User update
-* User deletion
-* Login
-* Register
-
-Schemathesis uses this contract to validate that the API behavior is aligned with the documented contract.
 
 ---
 
