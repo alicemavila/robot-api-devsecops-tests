@@ -1025,11 +1025,12 @@ Database validation and role-based authorization validation require a controlled
 
 ---
 
-# Future Improvements
+# Future Improvements / Out of Scope for Public API
 
-* Expand contract testing with additional controlled scenarios when using a private or local API environment
-* Add role-based authorization tests using a dedicated API with user roles
-* Add database validation layer in a future controlled local API project
+* Expand API contract testing with advanced controlled scenarios using a private or local API environment
+* Implement role-based authorization tests in a dedicated API project with user roles and permissions
+* Implement database validation in a future local API project using a controlled database environment
+
 
 ---
 
