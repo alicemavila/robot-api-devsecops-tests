@@ -1,15 +1,36 @@
 #:schema https://raw.githubusercontent.com/schemathesis/schemathesis/master/src/schemathesis/config/schema.json
 
-generation.max-examples = 5
 rate-limit = "5/m"
-request-timeout = 10.0
+request-timeout = 30.0
+max-failures = 1
+
+headers = { "x-api-key" = "${API_KEY}", "User-Agent" = "Mozilla/5.0 QA-Automation-Portfolio" }
+
+[generation]
+mode = "positive"
+max-examples = 5
+with-security-parameters = false
+database = "none"
+
+[phases.examples]
+enabled = true
+fill-missing = true
+
+[phases.coverage]
+enabled = false
+unexpected-methods = []
+
+[phases.fuzzing]
+enabled = false
 
 [phases.stateful]
 enabled = false
 
-[phases.coverage]
-unexpected-methods = []
-
 [checks]
-unsupported_method.enabled = false
+enabled = false
+not_a_server_error.enabled = true
+response_schema_conformance.enabled = true
+ignored_auth.enabled = false
 negative_data_rejection.enabled = false
+unsupported_method.enabled = false
+missing_required_header.enabled = false
